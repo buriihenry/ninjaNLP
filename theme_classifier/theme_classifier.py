@@ -8,10 +8,9 @@ import os
 import sys
 import pathlib
 
-
-from utils import load_subtitles_dataset
 folder_path = pathlib.Path(__file__).parent.resolve()
 sys.path.append(os.path.join(folder_path,'../'))
+from utils import load_subtitles_dataset
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
@@ -41,7 +40,7 @@ class ThemeClassifier():
         
         # Run Model
         theme_output = self.theme_classifier(
-            script_batches[:2],
+            script_batches,
             self.theme_list,
             multi_label=True
         )
@@ -65,7 +64,7 @@ class ThemeClassifier():
 
         # Load Model
         df = load_subtitles_dataset(dtaset_path)
-        df = df.head(2)
+    
 
         # Run Inference
 

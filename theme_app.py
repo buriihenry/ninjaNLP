@@ -12,9 +12,9 @@ def get_themes(theme_list_str, subtitles_path, save_path):
     output_df = output_df[theme_list]
 
     output_df = output_df[theme_list].sum().reset_index()
-    output_df.columns = ['Theme','score']
+    output_df.columns = ['Theme','Score']
 
-    output_chart = gr.BarPlot(output_df, x="theme", y="score", title="Theme Classification", tooltip=["Theme","score"],vertical=False, width=500, height=260)
+    output_chart = gr.BarPlot(output_df, x="Theme", y="Score", title="Theme Classification", tooltip=["Theme","Score"],vertical=False, width=500, height=260)
     return output_chart
 
     
