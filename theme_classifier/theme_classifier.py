@@ -60,6 +60,7 @@ class ThemeClassifier():
     def get_themes(self,dtaset_path, save_path=None):
         # Read Save Path output if exists
         if save_path is not None and os.path.exists(save_path):
+            df = pd.read_csv(save_path)
             return df
 
         # Load Model
