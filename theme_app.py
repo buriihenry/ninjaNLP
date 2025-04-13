@@ -32,14 +32,17 @@ def get_character_network(subtitles_path, ner_path):
     return html
 
 def classify_text(text_classification_model, text_calssification_data_path, text_to_classify):
-    jutsu_classifier = JutsuClassifier(model_path=text_calssification_data_path, 
+    # Create a proper output directory path by adding a suffix to the model path
+    output_path = text_classification_model + "_output"
+    
+    jutsu_classifier = JutsuClassifier(model_path=text_classification_model, 
                                        data_path=text_calssification_data_path,
-                                       huggingface_token= os.getenv("HUGGINGFACE_TOKEN"))
+                                       output_path=output_path,  # Add this line
+                                       huggingface_token=os.getenv("HUGGINGFACE_TOKEN"))
     
     output = jutsu_classifier.classify_jutsu(text_to_classify)
     
     return output
-
 
     
 def main():

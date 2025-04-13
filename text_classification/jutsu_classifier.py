@@ -16,6 +16,7 @@ class JutsuClassifier():
     def __init__(self,
                 model_path,
                 data_path=None,
+                output_path=None,
                 text_column_name="text",
                 label_column_name="justus",
                 model_name="distilbert/distilbert-base-uncased",
@@ -25,6 +26,7 @@ class JutsuClassifier():
                 ):
         self.model_path = model_path
         self.data_path = data_path
+        self.output_path = output_path
         self.text_column_name = text_column_name
         self.label_column_name = label_column_name
         self.model_name = model_name
@@ -59,7 +61,7 @@ class JutsuClassifier():
             self.train_model(train_data, test_data, class_weights)
         
         self.model = self.load_model(self.model_path)
-        
+
 
     def load_model(self, model_path):
         model = pipeline(
