@@ -2,6 +2,11 @@ import gradio as gr
 
 from theme_classifier import ThemeClassifier
 from character_network import NamedEntityRecognizer, CharacterNetworkGenerator
+from text_classification import JutsuClassifier
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 def get_themes(theme_list_str, subtitles_path, save_path):
     theme_list = theme_list_str.split(",")
@@ -25,6 +30,16 @@ def get_character_network(subtitles_path, ner_path):
     relationship_df = character_network_generator.generate_character_network(ner_df)
     html = character_network_generator.draw_network_graph(relationship_df)
     return html
+
+def classify_text(text_classification_model, text_calssification_data_path, text_to_classify):
+    jutsu_classifier = JutsuClassifier(model_path=text_calssification_data_path, 
+                                       data_path=text_calssification_data_path,
+                                       huggingface_token= os.getenv("HUGGINGFACE_TOKEN"))
+    
+    output = jutsu_classifier.classify_jutsu(text_to_classify)
+    
+    return output
+
 
     
 def main():
@@ -61,7 +76,24 @@ def main():
                                     fn=get_character_network,
                                     inputs=[subtitles_path_network,ner_path],
                                     outputs=[network_html]
-                                )                    
+                                )  
+             # Text Classification with LLMs
+            with gr.Row():
+                    with gr.Column():
+                        gr.HTML("<h1>Text Classification with LLMs</h1>")
+                        with gr.Row():
+                            with gr.Column():
+                                text_classification_output = gr.Textbox(label="Text Classification Output")
+                            with gr.Column():
+                                text_classification_model = gr.Textbox(label="Model Path")
+                                text_calssification_data_path = gr.Textbox(label="Data Path")
+                                text_to_classify = gr.Textbox(label="Text Input")
+                                classify_text_btn = gr.Button("Classify Text")
+                                classify_text_btn.click(
+                                    fn=classify_text,
+                                    inputs=[text_classification_model,text_calssification_data_path, text_to_classify],
+                                    outputs=[text_classification_output]
+                                )                                                          
                             
         iface.launch(share=True)
     except AttributeError as e:
