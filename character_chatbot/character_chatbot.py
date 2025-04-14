@@ -119,8 +119,6 @@ class CharacterChatbot():
         
         # Function to prepare the prompt for tokenization
         def preprocess_function(examples):
-            # Ensure the prompt is properly formatted for tokenization
-            # This adds explicit tokenization settings
             return {
                 "processed_prompt": examples["prompt"]
             }
@@ -157,9 +155,6 @@ class CharacterChatbot():
             remove_unused_columns=False,
             push_to_hub=True,
             report_to="none",
-            # Add explicit padding and truncation
-            padding="max_length",
-            truncation=True,
         )
         
         max_seq_length = 512
@@ -172,9 +167,9 @@ class CharacterChatbot():
             max_seq_length=max_seq_length,
             tokenizer=tokenizer,
             args=training_arguments,
-            # Add explicit padding and truncation
-            padding="max_length",
-            truncation=True,
+            # Add padding and truncation as parameters to the trainer itself, not to SFTConfig
+            padding="max_length", 
+            truncation=True
         )
         
         trainer.train()
