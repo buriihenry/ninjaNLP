@@ -125,7 +125,7 @@ class CharacterChatbot():
             lora_dropout=lora_dropout,
             r=lora_r,
             bias="none",
-            task_type="CASUAL_LM"
+            task_type="CAUSAL_LM"
         )
 
         training_arguments = SFTConfig(
