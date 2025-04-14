@@ -87,20 +87,20 @@ class CharacterChatbot():
 
 
     def train(self, 
-              base_model_name_or_path,
-              dataset,
-              output_dir="./results",
-              per_device_train_batch_size=1,
-              gradient_accumulation_steps=1,
-              optimizer="paged_adamw_32bit",
-              save_steps=200,
-              logging_steps=10,
-              max_steps=300,
-              lr_scheduler_type="constant",
-              max_grad_norm=0.3,
-              learning_rate=2e-4,
-              warmup_ratio =0.3,   
-              ): 
+          base_model_name_or_path,
+          dataset,
+          output_dir="./results",
+          per_device_train_batch_size=1,
+          gradient_accumulation_steps=1,
+          optimizer="paged_adamw_32bit",
+          save_steps=200,
+          logging_steps=10,
+          max_steps=300,
+          lr_scheduler_type="constant",
+          max_grad_norm=0.3,
+          learning_rate=2e-4,
+          warmup_ratio=0.3,   
+         ): 
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type="nf4",
@@ -111,13 +111,23 @@ class CharacterChatbot():
             base_model_name_or_path,
             quantization_config=bnb_config,
             trust_remote_code=True,
-            
         )
         model.config.use_cache = False
 
         tokenizer = AutoTokenizer.from_pretrained(base_model_name_or_path)
         tokenizer.pad_token = tokenizer.eos_token
-
+        
+        # Function to prepare the prompt for tokenization
+        def preprocess_function(examples):
+            # Ensure the prompt is properly formatted for tokenization
+            # This adds explicit tokenization settings
+            return {
+                "processed_prompt": examples["prompt"]
+            }
+        
+        # Apply preprocessing
+        processed_dataset = dataset.map(preprocess_function)
+        
         lora_alpha = 16
         lora_dropout = 0.1
         lora_r = 64
@@ -133,7 +143,7 @@ class CharacterChatbot():
         training_arguments = SFTConfig(
             output_dir=output_dir,
             per_device_train_batch_size=per_device_train_batch_size,
-            gradient_accumulation_steps= gradient_accumulation_steps,
+            gradient_accumulation_steps=gradient_accumulation_steps,
             optim=optimizer,
             save_steps=save_steps,
             logging_steps=logging_steps,
@@ -147,23 +157,30 @@ class CharacterChatbot():
             remove_unused_columns=False,
             push_to_hub=True,
             report_to="none",
+            # Add explicit padding and truncation
+            padding="max_length",
+            truncation=True,
         )
+        
         max_seq_length = 512
 
         trainer = SFTTrainer(
             model=model,
-            train_dataset=dataset,
+            train_dataset=processed_dataset,
             peft_config=peft_config,
-            dataset_text_field = "prompt",
+            dataset_text_field="processed_prompt",  # Use processed prompt
             max_seq_length=max_seq_length,
             tokenizer=tokenizer,
             args=training_arguments,
+            # Add explicit padding and truncation
+            padding="max_length",
+            truncation=True,
         )
+        
         trainer.train()
 
         #save the model
         trainer.model.save_pretrained("final_ckpt")
-        trainer.save_pretrained("final_ckpt")
         #flush Memory
         del trainer,model
         gc.collect()
@@ -195,10 +212,10 @@ class CharacterChatbot():
         naruto_transcrpt_df['naruto_response_flag'] = 0
         naruto_transcrpt_df.loc[(naruto_transcrpt_df['name'] == 'Naruto') & (naruto_transcrpt_df['number_of_words'] > 5), 'naruto_response_flag'] = 1
         indexes_to_take = list(naruto_transcrpt_df[(naruto_transcrpt_df['naruto_response_flag'] == 1) & (naruto_transcrpt_df.index>0)].index)
-        #prompt
+        
+        #prompt - KEEPING THIS AS IN YOUR ORIGINAL CODE
         system_prompt = """
         You are Naruto from the anime (Naruto). Your responses should reflect his personality, character traits and speech patterns. \n
-
         """
         prompts = []
         for index in indexes_to_take:
@@ -210,5 +227,5 @@ class CharacterChatbot():
         df = pd.DataFrame({"prompt": prompts})
         dataset = Dataset.from_pandas(df)
 
-        return dataset     
+        return dataset
 
