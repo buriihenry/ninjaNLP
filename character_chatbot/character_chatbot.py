@@ -86,115 +86,101 @@ class CharacterChatbot():
         return pipeline
 
 
-    def train(self, 
-          base_model_name_or_path,
-          dataset,
-          output_dir="./results",
-          per_device_train_batch_size=1,
-          gradient_accumulation_steps=1,
-          optimizer="paged_adamw_32bit",
-          save_steps=200,
-          logging_steps=10,
-          max_steps=300,
-          lr_scheduler_type="constant",
-          max_grad_norm=0.3,
-          learning_rate=2e-4,
-          warmup_ratio=0.3,   
-         ): 
+    def train(self,
+              base_model_name_or_path,
+              dataset,
+              output_dir = "./results",
+              per_device_train_batch_size = 1,
+              gradient_accumulation_steps = 1,
+              optim = "paged_adamw_32bit",
+              save_steps = 200,
+              logging_steps = 10,
+              learning_rate = 2e-4,
+              max_grad_norm = 0.3,
+              max_steps = 300,
+              warmup_ratio = 0.3,
+              lr_scheduler_type = "constant",
+              ):
+        
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch.float16,
-        )  
-
-        model = AutoModelForCausalLM.from_pretrained(
-            base_model_name_or_path,
-            quantization_config=bnb_config,
-            trust_remote_code=True,
         )
+
+        model = AutoModelForCausalLM.from_pretrained(base_model_name_or_path, 
+                                                     quantization_config= bnb_config,
+                                                     trust_remote_code=True)
         model.config.use_cache = False
 
-        tokenizer = AutoTokenizer.from_pretrained(base_model_name_or_path)
-        tokenizer.pad_token = tokenizer.eos_token
-        
-        # Function to prepare the prompt for tokenization
-        def preprocess_function(examples):
-            return {
-                "processed_prompt": examples["prompt"]
-            }
-        
-        # Apply preprocessing
-        processed_dataset = dataset.map(preprocess_function)
-        
+        toknizer = AutoTokenizer.from_pretrained(base_model_name_or_path)
+        toknizer.pad_token = toknizer.eos_token
+
         lora_alpha = 16
         lora_dropout = 0.1
-        lora_r = 64
+        lora_r=64
 
         peft_config = LoraConfig(
             lora_alpha=lora_alpha,
             lora_dropout=lora_dropout,
             r=lora_r,
             bias="none",
-            task_type="CAUSAL_LM",
+            task_type="CASUAL_LM"
         )
 
         training_arguments = SFTConfig(
-            output_dir=output_dir,
-            per_device_train_batch_size=per_device_train_batch_size,
-            gradient_accumulation_steps=gradient_accumulation_steps,
-            optim=optimizer,
-            save_steps=save_steps,
-            logging_steps=logging_steps,
-            max_steps=max_steps,
-            learning_rate=learning_rate,
-            lr_scheduler_type=lr_scheduler_type,
-            warmup_ratio=warmup_ratio,
-            max_grad_norm=max_grad_norm,
-            group_by_length=True,
-            fp16=True,
-            remove_unused_columns=False,
-            push_to_hub=True,
-            report_to="none",
+        output_dir=output_dir,
+        per_device_train_batch_size = per_device_train_batch_size,
+        gradient_accumulation_steps = gradient_accumulation_steps,
+        optim = optim,
+        save_steps = save_steps,
+        logging_steps = logging_steps,
+        learning_rate = learning_rate,
+        fp16= True,
+        max_grad_norm = max_grad_norm,
+        max_steps = max_steps,
+        warmup_ratio = warmup_ratio,
+        group_by_length = True,
+        lr_scheduler_type = lr_scheduler_type,
+        report_to = "none"
         )
-        
-        max_seq_length = 512
+
+        max_seq_len = 512
 
         trainer = SFTTrainer(
-            model=model,
-            train_dataset=processed_dataset,
+            model = model,
+            train_dataset=dataset,
             peft_config=peft_config,
-            dataset_text_field="processed_prompt",  # Use processed prompt
-            max_seq_length=max_seq_length,
-            tokenizer=tokenizer,
-            args=training_arguments,
-            # Add padding and truncation as parameters to the trainer itself, not to SFTConfig
-            padding="max_length", 
-            truncation=True
+            dataset_text_field="prompt",
+            max_seq_length=max_seq_len,
+            tokenizer=toknizer,
+            args = training_arguments,
         )
-        
+
         trainer.train()
 
-        #save the model
+        # Save model 
         trainer.model.save_pretrained("final_ckpt")
-        #flush Memory
-        del trainer,model
-        gc.collect()
-        
-        base_model = AutoModelForCausalLM.from_pretrained(
-            base_model_name_or_path,
-            return_dict=True,
-            quantization_config=bnb_config,
-            torch_dtype=torch.float16,
-            device_map=self.device,
-        )
+        toknizer.save_pretrained("final_ckpt")
 
+        # Flush memory
+        del trainer, model
+        gc.collect()
+
+        base_model = AutoModelForCausalLM.from_pretrained(base_model_name_or_path,
+                                                          return_dict=True,
+                                                          quantization_config=bnb_config,
+                                                          torch_dtype = torch.float16,
+                                                          device_map = self.device
+                                                          )
+        
         tokenizer = AutoTokenizer.from_pretrained(base_model_name_or_path)
 
-        model = PeftModel.from_pretrained(base_model, "final_ckpt")
+        model = PeftModel.from_pretrained(base_model,"final_ckpt")
         model.push_to_hub(self.model_path)
         tokenizer.push_to_hub(self.model_path)
 
-        #Flush Memory
+        # Flush Memory
         del model, base_model
         gc.collect()
                                                                                                                         
