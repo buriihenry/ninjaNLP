@@ -21,3 +21,5 @@ torch==2.6.0
 fastapi==0.103.1 
 pydantic==2.3.0
 evaluate==0.3.0
+trl==0.9.6
+bitsandbytes==0.43.3

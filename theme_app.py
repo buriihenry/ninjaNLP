@@ -3,6 +3,7 @@ import gradio as gr
 from theme_classifier import ThemeClassifier
 from character_network import NamedEntityRecognizer, CharacterNetworkGenerator
 from text_classification import JutsuClassifier
+from character_chatbot import CharacterChatbot
 
 import os
 from dotenv import load_dotenv
@@ -42,6 +43,13 @@ def classify_text(text_classification_model, text_calssification_data_path, text
     
     output = jutsu_classifier.classify_jutsu(text_to_classify)
     
+    return output
+
+def chat_with_character_chatbot(message, history):
+    character_chatbot = CharacterChatbot("burii/Naruto_Llama-3-8B",
+                                         huggingface_token=os.getenv("HUGGINGFACE_TOKEN"))
+    output = character_chatbot.chat(message, history)
+    output = output['content'].strip()
     return output
 
     
@@ -96,7 +104,13 @@ def main():
                                     fn=classify_text,
                                     inputs=[text_classification_model,text_calssification_data_path, text_to_classify],
                                     outputs=[text_classification_output]
-                                )                                                          
+                                )
+            #Character Chatbot
+            with gr.Row():
+                with gr.Column():
+                    gr.HTML("<h1>Character Chatbot</h1>")
+                    gr.ChatInterface(chat_with_character_chatbot)
+                                                                              
                             
         iface.launch(share=True)
     except AttributeError as e:
