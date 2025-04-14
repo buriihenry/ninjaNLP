@@ -1,6 +1,21 @@
 # NinjaNLP - Naruto Anime Analysis Tools
 
-A comprehensive Natural Language Processing toolkit for analyzing the Naruto anime series, featuring theme classification, character network analysis, jutsu classification, and a Naruto-themed chatbot.
+## About
+
+NinjaNLP is an innovative NLP toolkit specifically designed for analyzing the Naruto anime series. By leveraging state-of-the-art language models and machine learning techniques, this project offers unique insights into the rich narrative world of Naruto through:
+
+- **Advanced Theme Analysis**: Automatically identify and track themes like friendship, perseverance, and conflict across episodes using BART zero-shot classification
+- **Character Relationship Mapping**: Visualize the complex web of character interactions and relationships using Named Entity Recognition
+- **Jutsu Classification System**: Categorize and analyze different ninja techniques (jutsu) mentioned in the series using DistilBERT
+- **Interactive Naruto Chatbot**: Engage with a character-accurate chatbot trained on Naruto's dialogue using LLaMA model
+
+Perfect for:
+- Anime researchers and content creators
+- Naruto fans seeking deeper analysis
+- NLP practitioners interested in anime/manga domain applications
+- Students learning about applied machine learning in entertainment analysis
+
+Built with modern NLP technologies including Hugging Face Transformers, SpaCy, and Gradio, NinjaNLP demonstrates practical applications of machine learning in media analysis while providing valuable insights into one of the world's most popular anime series.
 
 ## 🚀 Key Features
 
