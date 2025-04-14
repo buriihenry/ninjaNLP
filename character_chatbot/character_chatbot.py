@@ -20,7 +20,7 @@ def remove_parentheses(text):
 
 class CharacterChatbot():
     def __init__(self, model_path, 
-                 data_path="/content/data/naruto.csv", 
+                 data_path="/content/ninjaNLP/data/naruto.csv", 
                  huggingface_token=None,
                  ):
         
