@@ -2,6 +2,7 @@ transformers==4.44.0
 nltk==3.8.1
 gradio==4.36.1
 pyvis==0.3.2
+evaluate==0.4.2
 python-dotenv==1.0.1
 gradio_client==1.0.1
 joblib==1.4.2
@@ -19,6 +20,4 @@ seaborn==0.13.2
 torch==2.6.0
 fastapi==0.103.1 
 pydantic==2.3.0
-evaluate==0.3.0
-trl==0.9.6
-bitsandbytes==0.43.3
+
