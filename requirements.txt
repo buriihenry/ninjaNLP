@@ -20,3 +20,4 @@ seaborn==0.13.2
 torch==2.6.0
 fastapi==0.103.1 
 pydantic==2.3.0
+evaluate==0.3.0

@@ -1,3 +1,4 @@
 # ninjaNLP
 
-Readme coming soon
+#
+!python -m spacy download en_core_web_trf
