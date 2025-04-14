@@ -143,7 +143,7 @@ class CharacterChatbot():
             warmup_ratio=warmup_ratio,
             max_grad_norm=max_grad_norm,
             group_by_length=True,
-            bf16=True,
+            fp16=True,
             remove_unused_columns=False,
             push_to_hub=True,
             report_to="none",
